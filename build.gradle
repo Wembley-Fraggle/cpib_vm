@@ -1,0 +1,73 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+ext.antlr = [
+    antlrSource: 'src/main/antlr',
+    destinationDir: "generated-sources/java"
+]
+
+configurations {
+    antlr4 {
+        description = "ANTLR4"
+    }
+}
+
+
+jar {
+  manifest {
+    attributes(
+      "Implementation-Title": project.name,
+      "Main-Class": "ch.fhnw.lederer.virtualmachine.TestVM"
+   )
+  }
+}
+
+dependencies {
+    compile 'org.antlr:antlr4-runtime:4.3'
+    antlr4 'org.antlr:antlr4:4.3'
+}
+
+task generateSources() {
+    outputs.dir file(antlr.destinationDir)
+    
+    description = 'Generates Java sources from ANTLR4 grammars.'
+    def grammars = fileTree(antlr.antlrSource).include('**/*.g4')
+    
+    grammars.visit { FileVisitDetails gDetails -> 
+        if (gDetails.file.isFile()) {
+            def path = relativePath(gDetails.file);
+            path = path.replace(File.separator, "/")
+            
+            def pkg = path.substring(0,path.lastIndexOf("/"))
+            pkg = pkg.replace(antlr.antlrSource,"")
+            if(pkg.startsWith('/')) {
+                pkg = pkg.substring(1,pkg.length())
+            }
+            pkg = pkg.replace("/",".")
+            
+            def outputDir = relativePath(buildDir) + "/" + antlr.destinationDir + "/" + pkg.replace(".","/")
+            outputDir = outputDir.replace("\\","/")
+            outputDir = outputDir.replace("//","/")
+            
+            file(outputDir).exists() || file(outputDir).mkdirs()
+            outputs.dir file(outputDir)
+            
+            doFirst {
+                javaexec {
+		            main = 'org.antlr.v4.Tool'
+		            classpath = configurations.antlr4
+		            args = ["-o", "${outputDir}" , "-package", pkg, gDetails.file ].flatten()
+	           }
+	       }
+        }   
+    }
+}
+compileJava.source generateSources.outputs.files, sourceSets.main.java
+
