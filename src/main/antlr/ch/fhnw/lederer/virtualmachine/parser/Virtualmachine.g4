@@ -21,7 +21,7 @@ import ch.fhnw.lederer.virtualmachine.IVirtualMachine;
 program: commands*;
 
 commands:
-         stopCmd | allocCmd | callCmd | returnCmd | copyInCmd | copyOutCmd 
+         stopCmd | errorCmd | allocCmd | callCmd | returnCmd | copyInCmd | copyOutCmd 
        | enterCmd | intLoadCmd | floatLoadCmd | loadRelCmd | derefCmd 
        | storeCmd | intInvCmd | floatInvCmd | intAddCmd | intSubCmd 
        | intMultCmd | intDivCmd | intModCmd  | intEqCmd | intNeCmd | intGtCmd
@@ -32,6 +32,16 @@ stopCmd : STOP loc=intVal
 {
     try {
         vm.Stop($loc.val);
+    }   
+    catch(IVirtualMachine.CodeTooSmallError ex) {
+       notifyErrorListeners("Code too small");
+    }
+};
+
+errorCmd : ERROR loc=intVal COMMA indicator=stringVal 
+{
+    try {
+        vm.Error($loc.val, $indicator.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
@@ -343,6 +353,7 @@ stringVal returns [String val]: STRING {
 };
 
 STOP         : 'Stop';
+ERROR        : 'Error';
 ALLOC        : 'Alloc';
 CALL         : 'Call';
 RETURN       : 'Return';

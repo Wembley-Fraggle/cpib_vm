@@ -48,6 +48,7 @@ public interface IVirtualMachine
 
     // stop operation
     void Stop(int loc) throws CodeTooSmallError;
+    void Error(int loc, String message) throws CodeTooSmallError;
 
     // routine operations
     void Alloc(int loc, int size) throws CodeTooSmallError;

@@ -181,6 +181,26 @@ public class VirtualMachine implements IVirtualMachine
         if (loc >= code.length) { throw new CodeTooSmallError(); }
         code[loc]= new Stop();
     }
+    
+    // stop instruction
+    private class Error implements IInstruction
+    {
+        private String message;
+        private Error(String message) {}
+
+        public void execute() throws ExecutionError
+        {
+            throw new ExecutionError(message);
+        }
+
+        public String toString() { return "Error"; }
+    }
+    
+    public void Error(int loc, String message) throws CodeTooSmallError
+    {
+        if (loc >= code.length) { throw new CodeTooSmallError(); }
+        code[loc]= new Error(message);
+    }
 
     // routine operations
 
