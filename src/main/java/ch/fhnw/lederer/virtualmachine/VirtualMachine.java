@@ -186,7 +186,9 @@ public class VirtualMachine implements IVirtualMachine
     private class Error implements IInstruction
     {
         private String message;
-        private Error(String message) {}
+        private Error(String message) {
+            this.message = message;
+        }
 
         public void execute() throws ExecutionError
         {
