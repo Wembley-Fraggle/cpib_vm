@@ -8,8 +8,6 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import ch.fhnw.lederer.virtualmachine.IVirtualMachine.ExecutionError;
-import ch.fhnw.lederer.virtualmachine.inputargs.InputArgsLexer;
-import ch.fhnw.lederer.virtualmachine.inputargs.InputArgsParser;
 import ch.fhnw.lederer.virtualmachine.parser.VirtualmachineLexer;
 import ch.fhnw.lederer.virtualmachine.parser.VirtualmachineParser;
 
@@ -22,9 +20,8 @@ public class TestVM {
             System.out.println("Invalid number or arguments");
             showUsageAndExit();
         }
-        InputArgsParser inputParser = parseArguments(args);
-        int codeSize = inputParser.getCodeSize();
-        int storeSize = inputParser.getStoreSize();
+        int codeSize = 1000;
+        int storeSize = 1000;
         
         String filePath = args[args.length-1];
         
@@ -39,6 +36,7 @@ public class TestVM {
             VirtualmachineParser parser = new VirtualmachineParser(tokenStream,vm);
             
             parser.program();
+            reader.close();
             if(parser.getNumberOfSyntaxErrors() > 0) {
                 System.exit(-1);
             }
@@ -50,25 +48,7 @@ public class TestVM {
     }
     
     private static void showUsageAndExit() {
-        System.out.println("Usage: TestVM [--codeSize <size>] [--storeSize <size>] filepath");
+        System.out.println("Usage: TestV filepath");
         System.exit(0);
-    }
-
-    private static InputArgsParser parseArguments(String[] args) {
-        StringBuilder inArgsBuffer = new StringBuilder();
-        for(int i = 0; i < args.length-1; i++) {
-            inArgsBuffer.append(args[i]).append(" ");
-        }
-        ANTLRInputStream inArgsStream = new ANTLRInputStream(inArgsBuffer.toString());
-        InputArgsLexer lexer = new InputArgsLexer(inArgsStream);
-        CommonTokenStream inArgsTokenStream = new CommonTokenStream(lexer);
-        InputArgsParser inputParser = new InputArgsParser(inArgsTokenStream);
-        inputParser.program();
-        if(inputParser.getNumberOfSyntaxErrors() > 0) {
-            System.out.println("Invalid arguments");
-            showUsageAndExit();
-        }
-        
-        return inputParser;
     }
 }
