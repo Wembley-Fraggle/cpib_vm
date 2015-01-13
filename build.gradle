@@ -1,8 +1,10 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin:'application'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+mainClassName = "ch.fhnw.lederer.virtualmachine.TestVM"
 
 repositories {
     mavenCentral()
@@ -24,7 +26,7 @@ jar {
   manifest {
     attributes(
       "Implementation-Title": project.name,
-      "Main-Class": "ch.fhnw.lederer.virtualmachine.TestVM"
+      "Main-Class": "$mainClassName"
    )
   }
 }

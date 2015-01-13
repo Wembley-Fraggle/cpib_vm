@@ -18,49 +18,62 @@ import ch.fhnw.lederer.virtualmachine.IVirtualMachine;
         this.vm = vm;
     }
 }
-program: commands*;
+program : instruction*;
+       
+instruction : loc=intVal COLON cmd[$loc.val];
 
-commands:
-         stopCmd | errorCmd | allocCmd | callCmd | returnCmd | copyInCmd | copyOutCmd 
-       | enterCmd | intLoadCmd | floatLoadCmd | loadRelCmd | derefCmd 
-       | storeCmd | intInvCmd | floatInvCmd | intAddCmd | intSubCmd 
-       | intMultCmd | intDivCmd | intModCmd  | intEqCmd | intNeCmd | intGtCmd
-       | intLtCmd | intGeCmd | intLeCmd | uncondJumpCmd |condJumpCmd
-       | boolInputCmd |intInputCmd | boolOutputCmd | intOutputCmd;
 
-stopCmd : STOP loc=intVal
+cmd[int loc]:
+         stopCmd[$loc] | errorCmd[$loc]
+       | allocCmd[$loc] | callCmd[$loc] 
+       | returnCmd[$loc] 
+       | copyInCmd[$loc] | copyOutCmd[$loc]
+       | enterCmd[$loc]
+       | intLoadCmd[$loc] | floatLoadCmd[$loc] 
+       | loadRelCmd[$loc] | derefCmd[$loc] | storeCmd[$loc] 
+       | intInvCmd[$loc] | floatInvCmd[$loc] 
+       | intAddCmd[$loc] | intSubCmd[$loc] | intMultCmd[$loc]
+       | intDivCmd[$loc] | intModCmd[$loc]  
+       | intEqCmd[$loc] | intNeCmd[$loc] | intGtCmd[$loc]
+       | intLtCmd[$loc] | intGeCmd[$loc] | intLeCmd[$loc] 
+       | uncondJumpCmd[$loc] | condJumpCmd[$loc]
+       | boolInputCmd[$loc] | intInputCmd[$loc] | boolOutputCmd[$loc] 
+       | intOutputCmd[$loc]
+;
+
+stopCmd[int loc] : STOP
 {
     try {
-        vm.Stop($loc.val);
+        vm.Stop($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-errorCmd : ERROR loc=intVal COMMA indicator=stringVal 
+errorCmd[int loc] : ERROR LPARENT indicator=stringVal RPARENT 
 {
     try {
-        vm.Error($loc.val, $indicator.val);
+        vm.Error($loc, $indicator.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-allocCmd : ALLOC loc=intVal COMMA size=intVal 
+allocCmd[int loc] : ALLOC LPARENT size=intVal RPARENT 
 {
     try {
-        vm.Alloc($loc.val,$size.val);
+        vm.Alloc($loc,$size.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-callCmd : CALL loc=intVal COMMA address=intVal {
+callCmd[int loc] : CALL LPARENT address=intVal RPARENT {
     try{
-        vm.Call($loc.val, $address.val);
+        vm.Call($loc, $address.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
@@ -68,19 +81,19 @@ callCmd : CALL loc=intVal COMMA address=intVal {
 }
 ;
 
-returnCmd : RETURN loc=intVal COMMA size=intVal
+returnCmd[int loc] : RETURN LPARENT size=intVal RPARENT 
 {   try{
-        vm.Return($loc.val, $size.val);
+        vm.Return($loc, $size.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-copyInCmd throws IVirtualMachine.CodeTooSmallError:
-COPY_IN loc=intVal COMMA from=intVal COMMA to=intVal {
+copyInCmd[int loc] :
+COPY_IN LPARENT from=intVal COMMA to=intVal RPARENT {
     try {
-        vm.CopyIn($loc.val,$from.val,$to.val);
+        vm.CopyIn($loc,$from.val,$to.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
@@ -88,10 +101,9 @@ COPY_IN loc=intVal COMMA from=intVal COMMA to=intVal {
 };
 
 
-copyOutCmd: COPY_OUT loc=intVal COMMA from=intVal COMMA to=intVal
-{
+copyOutCmd[int loc] : COPY_OUT LPARENT from=intVal COMMA to=intVal RPARENT {
     try {
-        vm.CopyOut($loc.val,$from.val,$to.val);
+        vm.CopyOut($loc,$from.val,$to.val);
     }
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
@@ -99,227 +111,227 @@ copyOutCmd: COPY_OUT loc=intVal COMMA from=intVal COMMA to=intVal
 }
 ;
 
-enterCmd: ENTER loc=intVal COMMA size=intVal COMMA extreme=intVal
+enterCmd[int loc] : ENTER LPARENT size=intVal COMMA extreme=intVal RPARENT
 {
     try {
-        vm.Enter($loc.val, $size.val, $extreme.val);
+        vm.Enter($loc, $size.val, $extreme.val);
     }
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     } 
 };
 
-intLoadCmd : INT_LOAD loc=intVal COMMA value=intVal
+intLoadCmd[int loc] : INT_LOAD LPARENT value=intVal RPARENT
 {
     try {
-        vm.IntLoad($loc.val, $value.val);
+        vm.IntLoad($loc, $value.val);
     }
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-floatLoadCmd: FLOAT_LOAD loc=intVal COMMA value=floatVal {
+floatLoadCmd[int loc] : FLOAT_LOAD LPARENT value=floatVal RPARENT {
     try{
-        vm.FloatLoad($loc.val,$value.val);
+        vm.FloatLoad($loc,$value.val);
     }
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-loadRelCmd: LOAD_REL loc=intVal COMMA address=intVal {
+loadRelCmd[int loc] : LOAD_REL LPARENT address=intVal RPARENT{
     try{
-        vm.LoadRel($loc.val,$address.val);
+        vm.LoadRel($loc,$address.val);
     }
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-derefCmd: DEREF loc=intVal {
+derefCmd[int loc] : DEREF {
     try{
-        vm.Deref($loc.val);
+        vm.Deref($loc);
     }
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-storeCmd: STORE loc=intVal {
+storeCmd[int loc] : STORE {
     try {
-        vm.Store($loc.val);
+        vm.Store($loc);
     }
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-intInvCmd: INT_INV loc=intVal {
+intInvCmd[int loc] : INT_INV {
     try {
-        vm.IntInv($loc.val);
+        vm.IntInv($loc);
     }
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-floatInvCmd: FLOAT_INV loc=intVal {
+floatInvCmd[int loc] : FLOAT_INV  {
     try {
-        vm.FloatInv($loc.val);
+        vm.FloatInv($loc);
     }
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };
 
-intAddCmd : INT_ADD loc=intVal {
+intAddCmd[int loc] : INT_ADD  {
     try {
-        vm.IntAdd($loc.val);
+        vm.IntAdd($loc);
     }
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 };  
 
-intSubCmd : INT_SUB loc=intVal {
+intSubCmd[int loc] : INT_SUB  {
     try {
-        vm.IntSub($loc.val);
+        vm.IntSub($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intMultCmd : INT_MULT loc=intVal {
+intMultCmd[int loc] : INT_MULT  {
     try {
-        vm.IntMult($loc.val);
+        vm.IntMult($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intDivCmd : INT_DIV  loc=intVal {
+intDivCmd[int loc] : INT_DIV   {
     try {
-        vm.IntDiv($loc.val);
+        vm.IntDiv($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intModCmd : INT_MOD  loc=intVal {
+intModCmd[int loc] : INT_MOD   {
     try {
-        vm.IntMod($loc.val);
+        vm.IntMod($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intEqCmd : INT_EQ loc=intVal {
+intEqCmd[int loc] : INT_EQ  {
     try {
-        vm.IntEQ($loc.val);
+        vm.IntEQ($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intNeCmd : INT_NE loc=intVal {
+intNeCmd[int loc] : INT_NE  {
     try {
-        vm.IntNE($loc.val);
+        vm.IntNE($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intGtCmd : INT_GT loc=intVal {
+intGtCmd[int loc] : INT_GT  {
     try {
-        vm.IntGT($loc.val);
+        vm.IntGT($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intLtCmd : INT_LT loc=intVal {
+intLtCmd[int loc] : INT_LT  {
     try {
-        vm.IntLT($loc.val);
+        vm.IntLT($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intGeCmd : INT_GE loc=intVal {
+intGeCmd[int loc] : INT_GE  {
     try {
-        vm.IntGE($loc.val);
+        vm.IntGE($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intLeCmd : INT_LE loc=intVal {
+intLeCmd[int loc] : INT_LE  {
     try {
-        vm.IntLE($loc.val);
+        vm.IntLE($loc);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-uncondJumpCmd : UNCOND_JUMP loc=intVal COMMA jumpLoc=intVal {
+uncondJumpCmd[int loc] : UNCOND_JUMP LPARENT jumpLoc=intVal RPARENT {
     try {
-        vm.UncondJump($loc.val,$jumpLoc.val);
+        vm.UncondJump($loc,$jumpLoc.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-condJumpCmd : COND_JUMP loc=intVal COMMA jumpLoc=intVal {
+condJumpCmd[int loc] : COND_JUMP LPARENT jumpLoc=intVal RPARENT {
     try {
-        vm.CondJump($loc.val, $jumpLoc.val);
+        vm.CondJump($loc, $jumpLoc.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-boolInputCmd : BOOL_INPUT loc=intVal COMMA indicator=stringVal {
+boolInputCmd[int loc] : BOOL_INPUT LPARENT indicator=stringVal RPARENT{
     try {
-        vm.BoolInput($loc.val, $indicator.val);
+        vm.BoolInput($loc, $indicator.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-boolOutputCmd : BOOL_OUTPUT loc=intVal COMMA indicator=stringVal {
+boolOutputCmd[int loc] : BOOL_OUTPUT LPARENT indicator=stringVal RPARENT{
     try {
-        vm.BoolOutput($loc.val, $indicator.val);
+        vm.BoolOutput($loc, $indicator.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intInputCmd : INT_INPUT loc=intVal COMMA indicator=stringVal {
+intInputCmd[int loc] : INT_INPUT LPARENT indicator=stringVal RPARENT{
     try {
-        vm.IntInput($loc.val, $indicator.val);
+        vm.IntInput($loc, $indicator.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
     }
 }; 
 
-intOutputCmd : INT_OUTPUT loc=intVal COMMA indicator=stringVal {
+intOutputCmd[int loc] : INT_OUTPUT LPARENT indicator=stringVal RPARENT{
     try {
-        vm.IntOutput($loc.val, $indicator.val);
+        vm.IntOutput($loc, $indicator.val);
     }   
     catch(IVirtualMachine.CodeTooSmallError ex) {
        notifyErrorListeners("Code too small");
@@ -351,6 +363,7 @@ stringVal returns [String val]: STRING {
     s = s.substring(1, s.length() - 1);
     $val = s;
 };
+
 
 STOP         : 'Stop';
 ERROR        : 'Error';
@@ -384,7 +397,11 @@ BOOL_INPUT   : 'BoolInput';
 BOOL_OUTPUT : 'BoolOutput';
 INT_INPUT   : 'IntInput';    
 INT_OUTPUT  : 'IntOutput';
-COMMA       : ',';
+COLON        : ':';
+LPARENT      : '(';
+RPARENT      : ')';
+COMMA        : ',';
+
 
 FLOAT:      '-'? [0-9]+ '.' [0-9]*;
 INT:        '-'?[0-9]+;

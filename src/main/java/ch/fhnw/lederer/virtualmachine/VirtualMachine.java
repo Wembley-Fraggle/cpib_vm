@@ -39,6 +39,7 @@ public class VirtualMachine implements IVirtualMachine
     private boolean readBool() throws ExecutionError {
         String s;
         try {
+            reader.reset();
             s= reader.readLine();
         } catch (IOException e) {
             throw new ExecutionError("Input failed.");
@@ -195,7 +196,7 @@ public class VirtualMachine implements IVirtualMachine
             throw new ExecutionError(message);
         }
 
-        public String toString() { return "Error"; }
+        public String toString() { return "Error(\""+message+"\")"; }
     }
     
     public void Error(int loc, String message) throws CodeTooSmallError
@@ -468,7 +469,6 @@ public class VirtualMachine implements IVirtualMachine
     }
 
     // monadic instructions
-
     private class IntInv implements IInstruction
     {
         private IntInv() {}

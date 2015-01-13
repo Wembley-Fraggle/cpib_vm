@@ -1,5 +1,6 @@
 package ch.fhnw.lederer.virtualmachine;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,17 +17,19 @@ import ch.fhnw.lederer.virtualmachine.parser.VirtualmachineParser;
 public class TestVM {
 
     public static void main(String[] args) {
-        if(args.length < 1) {
-            System.out.println("Invalid number or arguments");
-            showUsageAndExit();
+        String filename = System.getProperty("file");
+        if(filename == null) {
+            throw new IllegalArgumentException("Missing file property");
         }
-        int codeSize = 1000;
-        int storeSize = 1000;
         
-        String filePath = args[args.length-1];
+        int codeSize  = parseInt(System.getProperty("codeSize"),1000);
+        int storeSize = parseInt(System.getProperty("storeSize"),1000);
         
-        try(InputStream fs = TestVM.class.getClassLoader().getResourceAsStream(filePath))
+        try(InputStream fs = TestVM.class.getClassLoader().getResourceAsStream(filename))
         {
+            if(fs == null) {
+               throw new FileNotFoundException();
+            }
             VirtualMachine vm = new VirtualMachine(codeSize, storeSize);
             
             InputStreamReader reader = new InputStreamReader(fs,"UTF-8");
@@ -38,7 +41,7 @@ public class TestVM {
             parser.program();
             reader.close();
             if(parser.getNumberOfSyntaxErrors() > 0) {
-                System.exit(-1);
+                throw new IllegalArgumentException("Parser erros");
             }
             
             vm.execute();
@@ -47,8 +50,16 @@ public class TestVM {
         }
     }
     
-    private static void showUsageAndExit() {
-        System.out.println("Usage: TestV filepath");
-        System.exit(0);
+    private static int parseInt(String value, int defaultVal) {
+        if(value != null) {
+            try {
+                return Integer.parseInt(value);
+            }
+            catch(NumberFormatException ex) {
+                System.out.println(value + "is not a valid number");
+                System.exit(-1);
+            }
+        }
+        return defaultVal;
     }
 }
