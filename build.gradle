@@ -22,7 +22,15 @@ configurations {
 }
 
 
+task copyRuntimeLibs(type: Copy) {  
+  into "$libsDir"  
+  from configurations.testRuntime  
+}
+
+
+
 jar {
+  dependsOn copyRuntimeLibs
   manifest {
     attributes(
       "Implementation-Title": project.name,
