@@ -5,9 +5,7 @@ Das Projekt wird mit Gradle 2.1 auf einer Console gebuildet.
 Es wird davon ausgegangen, dass Gradle korrekt installiert wurde. 
 Mit dem Kommando
   gradle jar 
-wird das Jar-File der virtuellen Maschine erstellt. Sofern keine 
-Fehler bestehen, befindet sich die virtuelle Maschine im 
-Ordner build\libs\vm.jar.
+wird das Jar-File der virtuellen Maschine erstellt. 
 
 HOWTO-Run
 ---------
